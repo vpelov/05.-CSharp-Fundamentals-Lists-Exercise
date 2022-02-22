@@ -2,110 +2,121 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace P08.AnonymousThreat
+namespace P08.AnonymousThreat2
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            List<string> inputText = Console.ReadLine().Split(' ').ToList();
+            List<string> inputData = Console.ReadLine().Split(" ", StringSplitOptions.RemoveEmptyEntries).ToList();
+
             string command = Console.ReadLine();
 
             while (command != "3:1")
             {
-                string[] commandArray = command.Split(' ').ToArray();
+                string[] commandArray = command.Split();
 
                 if (commandArray[0] == "merge")
                 {
                     int startIndex = int.Parse(commandArray[1]);
                     int endIndex = int.Parse(commandArray[2]);
 
-                    inputText = GoMerge(inputText, startIndex, endIndex);
-
+                    DoMerge(inputData, startIndex, endIndex);
                 }
                 else if (commandArray[0] == "divide")
                 {
                     int index = int.Parse(commandArray[1]);
-                    int partition = int.Parse(commandArray[2]);
+                    int numPartition = int.Parse(commandArray[2]);
 
-                    inputText = GetDivide(inputText, index, partition);
+                    DoDivide(inputData, index, numPartition);
                 }
 
                 command = Console.ReadLine();
             }
 
-            Console.WriteLine(String.Join(" ", inputText));
-
-        }
-
-        static List<string> GoMerge(List<string> currentList, int start, int end)
-        {
-            List<string> middleResult = currentList;
-
-            if (end < currentList.Count)
-            {
-                int index = start;
-                for (int i = start + 1; i <= end; i++)      //concatenate string
-                {
-                    middleResult[index] = middleResult[index] + middleResult[i];
-                }
-                for (int i = end; i > start; i--)            // Remove index
-                {
-                    middleResult.RemoveAt(i);
-                }
-
-            }
-            else if (end >= currentList.Count)
-            {
-                int index = start;
-                for (int i = start + 1; i < currentList.Count; i++)       //concatenate string
-                {
-                    middleResult[index] = middleResult[index] + middleResult[i];
-                }
-                for (int i = currentList.Count - 1; i > start; i--)        // Remove index
-                {
-                    middleResult.RemoveAt(i);
-                }
-            }
-
-            return middleResult;
+            Console.WriteLine(String.Join(" ", inputData));
         }
 
 
-        static List<string> GetDivide(List<string> currentList, int index, int partition)
+
+        static void DoMerge(List<string> inputList, int startIndex, int endIndex)
         {
-            string work = currentList[index];
-            currentList.RemoveAt(index);
-            int step = work.Length / partition;
-
-            if (work.Length % partition == 0)
+            if (startIndex < 0)
             {
-                for (int i = work.Length - 1; i >= 0; i -= step)
-                {
-                    string element = work.Substring(i - step + 1, step);
-                    currentList.Insert(index, element);
-                }
-
+                startIndex = 0;
             }
-            else if (work.Length % partition != 0)
+
+            if (endIndex > inputList.Count - 1)
             {
+                endIndex = inputList.Count - 1;
+            }
+
+            for (int i = startIndex; i < endIndex; i++)
+            {
+
+                inputList[startIndex] += inputList[i + 1];
+                inputList.RemoveAt(i + 1);
+                i--;
+                endIndex--;
+            }
+        }
+
+
+        static void DoDivide(List<string> inputList, int index, int numPart)
+        {
+            string workString = inputList[index];
+            int currentLenghtString = workString.Length;
+
+            if (currentLenghtString < numPart)
+            {
+                return;
+            }
+
+            if (currentLenghtString % numPart == 0)
+            {
+                int step = currentLenghtString / numPart;
+
+                for (int i = numPart - 1; i >= 0; i--)
+                {
+                    string diff = workString.Substring(currentLenghtString - step, step );
+                    inputList.Insert(index, diff);
+                    currentLenghtString -= step;
+
+                }
+                inputList.RemoveAt(index + numPart);
+            }
+            else if (currentLenghtString % numPart != 0)   // List<int> inputList, int index, int numPart  //
+            {
+                int step = currentLenghtString / numPart;
+                int remainder = currentLenghtString % numPart;
+                List<string> temporary = new List<string>();
                 int count = 0;
-                for (int i = 0; i < work.Length; i += step)
+
+                for (int i = 0; i < numPart; i++)
                 {
-                    string element = work.Substring(i, step);
-                    currentList.Insert(index + count, element);
-                    count++;
-                    if (count == partition)
+                    if (i == (numPart - 1))
                     {
-                        break;
+                        string temp = workString.Substring(count, (currentLenghtString - step * (numPart - 1)));
+                        temporary.Add(temp);
+                    }
+                    else
+                    {
+                        string temp = workString.Substring(count, step);
+                        temporary.Add(temp);
+                        count += step;
                     }
                 }
 
-                int endSymbolIndex = work.Length - (work.Length % partition);
-                currentList[index + count - 1] += work.Substring(endSymbolIndex, work.Length - (partition * step));
+                inputList.RemoveAt(index);
+
+                for (int i = numPart - 1; i >= 0; i--)
+                {
+                    inputList.Insert(index, temporary[i]);
+                }                                             
+                
             }
 
-            return currentList;
         }
+
     }
 }
