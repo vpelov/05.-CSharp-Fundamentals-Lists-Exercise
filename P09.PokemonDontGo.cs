@@ -76,7 +76,7 @@ namespace P09.PokemonDontGo
 
         }
 
-        static void GetPokemonGreatIndex(List<int> inputList, int index)
+        static void GetPokemonGreatIndex(List<int> inputList, int index)   ///???
         {
             int currentValue = inputList[inputList.Count - 1];
 
